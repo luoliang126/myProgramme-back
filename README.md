@@ -52,5 +52,39 @@ python manage.py startapp sale // sale为应用名称(注意该sale目录与根�
     注意：执行python manage.py migrate后，创建的应用都会有apps.py和models.py文件，每一个应用都有单独对应的数据库
 
 6、数据库的操作ORM（Object relational mapping）对象映射
+    6.1、在创建的每个应用下都有apps.py和models.py文件，并手动添加到根目录的settings.py文件中去
+    INSTALLED_APPS = [
+        ......
+        'common.apps.CommonConfig' // common应用下的apps.py文件中的CommonConfig数据库模型
+    ]
 
+    其中apps.py相当于配置文件(配置当前应用的数据模型名称)
+    from django.apps import AppConfig
+    class LogincontentConfig(AppConfig):
+        name = 'loginContent'
 
+    models.py为数据模型
+    from django.db import models
+    class User(models.Model):
+        # 用户名称
+        username = models.CharField(max_length=20)
+        # 联系电话
+        mobile = models.CharField(max_length=11)
+        # 密码
+        password = models.CharField(max_length=18)
+
+    6.2、当数据模型models变更时，需要通知数据库中表字段相应变更。
+    python manage.py makemigrations loginContent // 检查common应用中是否有数据模型变更
+    如果有多个数据模型变更python manage.py makemigrations loginContent loginContent1 ......
+
+    假如：之前有一张表有以下字段username,mobile,password。并且这张表已经存储有数据。这个时候我们要再添加字段时，必须再添加的新字段中给一个默认值，如果不给就会报错'缺省值'。
+    from django.db import models
+    class User(models.Model):
+        username = models.CharField(max_length=20)
+        mobile = models.CharField(max_length=11)
+        password = models.CharField(max_length=18)
+        qq = models.CharField(max_length=20,null=True,blank=True)
+    这里的qq字段就是后面添加的，且初始值为null,可以没有该字段。
+
+    6.3、执行python manage.py makemigrations loginContent后，只是在loginContent应用中的migrations目录下创建了一个临时的修改数据模型字段，并未真正提交到数据库修改。还需要执行一段命令
+    python manage.py migrate   // 这个时候我们再到navicat中刷新以下表，就会发现多了一个loginContent_user的表了，或者是更新了该表
