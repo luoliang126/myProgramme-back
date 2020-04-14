@@ -9,3 +9,7 @@ class User(models.Model):
 
     # 密码
     password = models.CharField(max_length=18)
+
+# 将User表添加注册到admin管理界面，就可以实现admin管理这张表
+from django.contrib import admin
+admin.site.register(User)

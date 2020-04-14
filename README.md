@@ -65,6 +65,7 @@ python manage.py startapp sale // sale为应用名称(注意该sale目录与根�
 
     models.py为数据模型
     from django.db import models
+    创建一个数据模型User，映射数据库的一张User表
     class User(models.Model):
         # 用户名称
         username = models.CharField(max_length=20)
@@ -73,7 +74,7 @@ python manage.py startapp sale // sale为应用名称(注意该sale目录与根�
         # 密码
         password = models.CharField(max_length=18)
 
-    6.2、当数据模型models变更时，需要通知数据库中表字段相应变更。
+    6.2、当数据模型models变更时,例如User模型发生变更（添加字段或者其他操作），需要通知数据库中User表字段相应变更。
     python manage.py makemigrations loginContent // 检查common应用中是否有数据模型变更
     如果有多个数据模型变更python manage.py makemigrations loginContent loginContent1 ......
 
@@ -88,3 +89,24 @@ python manage.py startapp sale // sale为应用名称(注意该sale目录与根�
 
     6.3、执行python manage.py makemigrations loginContent后，只是在loginContent应用中的migrations目录下创建了一个临时的修改数据模型字段，并未真正提交到数据库修改。还需要执行一段命令
     python manage.py migrate   // 这个时候我们再到navicat中刷新以下表，就会发现多了一个loginContent_user的表了，或者是更新了该表
+
+    6.4、用户信息表，django已经帮我们创建好了（当然你也可以再重新创建一张用户表）
+    创建超级管理员账号 python manage.py createsuperuser，然后按照提示输入用户名、密码（至少8个字符）、邮箱等
+    django有一套自己的管理数据界面，运行python manage.py runserver   然后访问http://127.0.0.1:8000/admin
+    访问输入刚才我们创建的超级管理员账号和密码登陆。这是发现只有一个系统自带的Auth表，没有我们创建的User表？？？
+    所以需要将User这张表手动添加到Admin这个管理下，在loginContent下的models.py数据模型中添加：
+    from django.db import models
+    class User(models.Model):
+        # 用户名称
+        username = models.CharField(max_length=20)
+        # 联系电话
+        mobile = models.CharField(max_length=11)
+        # 密码
+        password = models.CharField(max_length=18)
+    # 将User表添加注册到admin管理界面，就可以实现admin管理这张表
+    from django.contrib import admin
+    admin.site.register(User)
+    注：admin界面可以通过视图操作数据库，是一套不错的后端管理界面，但是它样式固定，不方便修改，且不能按照一定的业务逻辑修改界面。所以我们需要开发一套自己的前端界面，既可以达到视图的优化，又能够操作数据！
+
+7、数据库的读写操作
+    
